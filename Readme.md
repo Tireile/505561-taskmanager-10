@@ -1,7 +1,7 @@
 # Личный проект «Менеджер задач» [![Build status][travis-image]][travis-url]
 
-* Студент: [Алексей Амосов](https://up.htmlacademy.ru/ecmascript/10/user/505561).
-* Наставник: `Неизвестно`.
+- Студент: [Алексей Амосов](https://up.htmlacademy.ru/ecmascript/10/user/505561).
+- Наставник: [Александр Пасунько](https://htmlacademy.ru/profile/id702351).
 
 ---
 
