@@ -4,6 +4,7 @@
   "private": true,
   "description": "Учебный проект «Менеджер задач» от HTML Academy",
   "scripts": {
+    "start": "live-server",
     "eslint": "eslint src/**/*.js",
     "test": "npm run eslint"
   },
