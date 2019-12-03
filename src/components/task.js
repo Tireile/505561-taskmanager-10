@@ -25,24 +25,16 @@ export const createTaskTemplate = (task) => {
         <button type="button" class="card__btn card__btn--edit">
           edit
         </button>
-        ${
-  isArchive
-    ? `<button type="button" class="card__btn card__btn--archive">
+        ${isArchive ? `<button type="button" class="card__btn card__btn--archive">
         archive
-      </button>`
-    : ``
-}
+      </button>` : ``}
         
-        ${
-  isFavorite
-    ? `<button
+        ${isFavorite ? `<button
         type="button"
         class="card__btn card__btn--favorites card__btn--disabled"
       >
         favorites
-      </button>`
-    : ``
-}
+      </button>` : ``}
         
       </div>
 
@@ -58,13 +50,10 @@ export const createTaskTemplate = (task) => {
 
       <div class="card__settings">
         <div class="card__details">
-        ${
-  dueDate
-    ? `<div class="card__dates">
+        ${dueDate ? `<div class="card__dates">
         <div class="card__date-deadline">
-          <p class="card__input-deadline-wrap ${
-  dueDate < new Date() ? `card--deadline` : ``
-}">
+          <p class="card__input-deadline-wrap 
+          ${dueDate < new Date() ? `card--deadline` : ``}">
             <span class="card__date">
             ${day} ${month}
             </span>
@@ -73,11 +62,7 @@ export const createTaskTemplate = (task) => {
             </span>
           </p>
         </div>
-      </div>`
-    : ``
-}
-          
-
+      </div>` : ``}
           <div class="card__hashtag">
             <div class="card__hashtag-list">
             ${hashtagRender(tags)}

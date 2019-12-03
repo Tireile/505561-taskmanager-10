@@ -61,13 +61,10 @@ const archiveTasksCount = (tasks) => {
   return count;
 };
 
-export const generateFilters = (tasks) => {
-  const filters = Object.keys(filterNames).map((key) => {
-    const countFn = filterNames[key];
-    return {
-      name: key,
-      count: countFn(tasks)
-    };
-  });
-  return filters;
-};
+export const generateFilters = (tasks) => Object.keys(filterNames).map((key) => {
+  const countFn = filterNames[key];
+  return {
+    name: key,
+    count: countFn(tasks)
+  };
+});

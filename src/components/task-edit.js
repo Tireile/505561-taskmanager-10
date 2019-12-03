@@ -22,8 +22,7 @@ const hashtagRender = (tags) => {
   return spanElements.join(`\n`);
 };
 
-const repeatingDaysRender = (repeatingDays) => {
-  return Object.keys(repeatingDays).map((key) => `<input
+const repeatingDaysRender = (repeatingDays) => Object.keys(repeatingDays).map((key) => `<input
       class="visually-hidden card__repeat-day-input"
       type="checkbox"
       id="repeat-${key}-4"
@@ -34,7 +33,6 @@ const repeatingDaysRender = (repeatingDays) => {
     <label class="card__repeat-day" for="repeat-${key}-4"
       >${key}</label
     >`).join(`\n`);
-};
 
 const colorsRender = (colors) => {
   const colorElements = colors.map((item) => {

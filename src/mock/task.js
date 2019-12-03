@@ -40,16 +40,14 @@ const getRandomDate = () => {
   return targetDate;
 };
 
-const generateRepeatingDays = () => {
-  return Object.keys(defaultRepeatingDays).reduce((result, key) => {
+const generateRepeatingDays = () =>
+  Object.keys(defaultRepeatingDays).reduce((result, key) => {
     result[key] = Math.random() > 0.5;
     return result;
   }, {});
-};
 
-const generateTags = (tagsSet) => {
-  return tagsSet.filter(() => Math.random() > 0.5).slice(0, 3);
-};
+const generateTags = (tagsSet) =>
+  tagsSet.filter(() => Math.random() > 0.5).slice(0, 3);
 
 const generateTask = () => {
   const dueDate = Math.random() > 0.5 ? null : getRandomDate();
@@ -65,8 +63,6 @@ const generateTask = () => {
   };
 };
 
-const generateTasks = (count) => {
-  return new Array(count).fill(``).map(generateTask);
-};
+const generateTasks = (count) => new Array(count).fill(``).map(generateTask);
 
 export {generateTask, generateTasks};
