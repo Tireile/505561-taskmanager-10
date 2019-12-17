@@ -1,4 +1,4 @@
-import { formatDate } from "../utils/common";
+import {formatDate} from "../utils/common";
 import AbstractComponent from "./abstract-component";
 
 
@@ -6,7 +6,7 @@ const hashtagRender = (tags) => {
   const spanElements = [];
   tags.forEach((item) => {
     spanElements.push(
-      `<span class="card__hashtag-inner">
+        `<span class="card__hashtag-inner">
         <span class="card__hashtag-name">
           ${item}
         </span>
@@ -16,10 +16,10 @@ const hashtagRender = (tags) => {
 };
 
 const createTaskTemplate = (task) => {
-  const { description, dueDate, tags, color, isFavorite, isArchive } = task;
+  const {description, dueDate, tags, color, isFavorite, isArchive} = task;
 
   const formatDueDate = formatDate(dueDate);
-  const { day, dayPeriod, hour, minute, month } = formatDueDate;
+  const {day, dayPeriod, hour, minute, month} = formatDueDate;
 
   return (
     `<article class="card card--${color}">

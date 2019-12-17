@@ -2,9 +2,9 @@ import BoardComponent from "./components/board";
 import BoardController from "./controllers/board";
 import SiteMenuComponent from "./components/site-menu";
 import FilterComponent from "./components/filter";
-import { generateTasks } from "./mock/task";
-import { generateFilters } from "./mock/filter";
-import { render, RenderPosition } from "./utils/render";
+import {generateTasks} from "./mock/task";
+import {generateFilters} from "./mock/filter";
+import {render, RenderPosition} from "./utils/render";
 
 const TASK_COUNT = 18;
 const tasks = generateTasks(TASK_COUNT);
