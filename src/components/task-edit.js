@@ -1,11 +1,12 @@
-import {formatDate, createElement} from "../utils";
-import {Colors} from "../const";
+import { formatDate } from "../utils/common";
+import { Colors } from "../const";
+import AbstractComponent from "./abstract-component";
 
 const hashtagRender = (tags) => {
   const spanElements = [];
   tags.forEach((item) => {
     spanElements.push(
-        `<span class="card__hashtag-inner">
+      `<span class="card__hashtag-inner">
         <input
           type="hidden"
           name="hashtag"
@@ -60,10 +61,10 @@ const getIsRepeat = (repeatingDays) => {
 };
 
 const createTaskEditTemplate = (task) => {
-  const {description, dueDate, repeatingDays, tags, color} = task;
+  const { description, dueDate, repeatingDays, tags, color } = task;
   const formatDueDate = formatDate(dueDate);
 
-  const {day, dayPeriod, hour, minute, month} = formatDueDate;
+  const { day, dayPeriod, hour, minute, month } = formatDueDate;
 
   return (
     `<article class="card card--edit card--${color} card--repeat">
@@ -155,24 +156,20 @@ const createTaskEditTemplate = (task) => {
   );
 };
 
-export default class TaskEdit {
+export default class TaskEdit extends AbstractComponent {
   constructor(task) {
+    super();
     this._task = task;
-    this._element = null;
   }
 
   getTemplate() {
     return createTaskEditTemplate(this._task);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  setSubmitHandler(handler) {
+    this
+      .getElement()
+      .querySelector(`form`)
+      .addEventListener(`submit`, handler);
   }
 }
