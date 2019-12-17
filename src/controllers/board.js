@@ -1,10 +1,10 @@
 import TaskComponent from "../components/task";
 import TaskEditComponent from "../components/task-edit";
-import SortComponent from "../components/sort";
+import SortComponent, { SortType } from "../components/sort";
 import TasksComponent from "../components/tasks";
 import NoTasksComponent from "../components/no-tasks";
 import LoadMoreButtonComponent from "../components/load-more-btn";
-import { render, RenderPosition, remove } from "../utils/render";
+import { render, RenderPosition, remove, replace } from "../utils/render";
 
 
 
@@ -22,11 +22,11 @@ const renderTask = (taskListElement, task) => {
     };
 
     const replaceEditToTask = () => {
-        taskListElement.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
+        replace(taskComponent, taskEditComponent);
     };
 
     const replaceTaskToEdit = () => {
-        taskListElement.replaceChild(taskEditComponent.getElement(), taskComponent.getElement());
+        replace(taskEditComponent, taskComponent);
     };
 
     const taskComponent = new TaskComponent(task);
@@ -91,5 +91,29 @@ export default class BoardController {
 
         renderTasks(taskListElement, tasks.slice(0, showingTasksCount));
         renderLoadMoreButton();
+
+        this._sortComponent.setSortTypeChangeHandler((sortType) => {
+            let sortedTasks = [];
+
+            switch (sortType) {
+                case SortType.DATE_UP:
+                    sortedTasks = tasks.slice().sort((a, b) => a.dueDate - b.dueDate);
+                    break;
+                case SortType.DATE_DOWN:
+                    sortedTasks = tasks.slice().sort((a, b) => b.dueDate - a.dueDate);
+                    break;
+                case SortType.DEFAULT:
+                    sortedTasks = tasks.slice(0, showingTasksCount)
+                    break;
+            }
+            taskListElement.innerHTML = ``;
+            renderTasks(taskListElement, sortedTasks);
+
+            if (sortType === SortType.DEFAULT) {
+                renderLoadMoreButton();
+            } else {
+                remove(this._loadMoreButtonComponent);
+            }
+        })
     }
 }
