@@ -59,10 +59,10 @@ const createTaskTemplate = (task) => {
             <p class="card__input-deadline-wrap 
             ${dueDate < new Date() ? `card--deadline` : ``}">
               <span class="card__date">
-              ${day} ${month}
+                ${day} ${month}
               </span>
               <span class="card__time">
-              ${hour}:${minute} ${dayPeriod}
+                ${hour}:${minute} ${dayPeriod}
               </span>
             </p>
           </div>
