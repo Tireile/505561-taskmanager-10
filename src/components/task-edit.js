@@ -1,175 +1,223 @@
-import {formatDate} from "../utils/common";
-import {Colors} from "../const";
-import AbstractComponent from "./abstract-component";
+import AbstractSmartComponent from './abstract-smart-component.js';
+import {COLORS, DAYS} from '../const.js';
+import {formatTime} from '../utils/common.js';
 
-const hashtagRender = (tags) => {
-  const spanElements = [];
-  tags.forEach((item) => {
-    spanElements.push(
-        `<span class="card__hashtag-inner">
-        <input
-          type="hidden"
-          name="hashtag"
-          value="repeat"
-          class="card__hashtag-hidden-input"
+const isRepeating = (repeatingDays) => {
+  return Object.values(repeatingDays).some(Boolean);
+};
+
+const createColorsMarkup = (colors, currentColor) => {
+  return colors
+    .map((color) => {
+      return (
+        `<input
+          type="radio"
+          id="color-${color}-4"
+          class="card__color-input card__color-input--${color} visually-hidden"
+          name="color"
+          value="${color}"
+          ${currentColor === color ? `checked` : ``}
         />
-        <p class="card__hashtag-name">#${item}</p>
-        <button type="button" class="card__hashtag-delete">delete</button>
-      </span>`
-    );
-  });
-  return spanElements.join(`\n`);
+        <label
+          for="color-${color}-4"
+          class="card__color card__color--${color}"
+          >${color}</label
+        >`
+      );
+    })
+    .join(`\n`);
 };
 
-const repeatingDaysRender = (repeatingDays) => Object.keys(repeatingDays).map((key) =>
-  `<input
-    class="visually-hidden card__repeat-day-input"
-    type="checkbox"
-    id="repeat-${key}-4"
-    name="repeat"
-    value="${key}"
-    ${repeatingDays[key] ? `checked` : ``}
-  />
-  <label class="card__repeat-day" for="repeat-${key}-4">${key}</label>`
-).join(`\n`);
-
-const colorsRender = (colors) => {
-  const colorElements = colors.map((item) => {
-    return (
-      `<input
-        type="radio"
-        id="color-${item}-4"
-        class="card__color-input card__color-input--${item} visually-hidden"
-        name="color"
-        value="${item}"
-      />
-      <label
-        for="color-${item}-4"
-        class="card__color card__color--${item}"
-      >${item}
-      </label>`
-    );
-  });
-  return colorElements.join(`\n`);
+const createRepeatingDaysMarkup = (days, repeatingDays) => {
+  return days
+    .map((day) => {
+      const isChecked = repeatingDays[day];
+      return (
+        `<input
+          class="visually-hidden card__repeat-day-input"
+          type="checkbox"
+          id="repeat-${day}-4"
+          name="repeat"
+          value="${day}"
+          ${isChecked ? `checked` : ``}
+        />
+        <label class="card__repeat-day" for="repeat-${day}-4"
+          >${day}</label
+        >`
+      );
+    })
+    .join(`\n`);
 };
 
-const getIsRepeat = (repeatingDays) => {
-  const isRepeat = Object.keys(repeatingDays)
-    .map((item) => repeatingDays[item])
-    .every((item) => item === false);
-  return isRepeat;
+const createHashtags = (tags) => {
+  return Array.from(tags)
+    .map((tag) => {
+      return (
+        `<span class="card__hashtag-inner">
+          <input
+            type="hidden"
+            name="hashtag"
+            value=${tag}
+            class="card__hashtag-hidden-input"
+          />
+          <p class="card__hashtag-name">
+            #${tag}
+          </p>
+          <button
+              type="button"
+              class="card__hashtag-delete"
+          >
+            delete
+          </button>
+        </span>`
+      );
+    })
+    .join(`\n`);
 };
 
-const createTaskEditTemplate = (task) => {
-  const {description, dueDate, repeatingDays, tags, color} = task;
-  const formatDueDate = formatDate(dueDate);
+const createTaskEditTemplate = (task, options = {}) => {
+  const {description, tags, dueDate, color} = task;
+  const {isDateShowing, isRepeatingTask, activeRepeatingDays} = options;
 
-  const {day, dayPeriod, hour, minute, month} = formatDueDate;
+  const isExpired = dueDate instanceof Date && dueDate < Date.now();
+  const isBlockSaveButton = (isDateShowing && isRepeatingTask) ||
+    (isRepeatingTask && !isRepeating(activeRepeatingDays));
+
+  // const date = (isDateShowing && dueDate) ? formatDate(dueDate) : ``;
+  const time = (isDateShowing && dueDate) ? formatTime(dueDate) : ``;
+
+  const repeatClass = isRepeatingTask ? `card--repeat` : ``;
+  const deadlineClass = isExpired ? `card--deadline` : ``;
+
+  const tagsMarkup = createHashtags(tags);
+  const colorsMarkup = createColorsMarkup(COLORS, color);
+  const repeatingDaysMarkup = createRepeatingDaysMarkup(DAYS, activeRepeatingDays);
 
   return (
-    `<article class="card card--edit card--${color} card--repeat">
+    `<article class="card card--edit card--${color} ${repeatClass} ${deadlineClass}">
       <form class="card__form" method="get">
         <div class="card__inner">
           <div class="card__color-bar">
-            <svg class="card__color-bar-wave" width="100%" height="10">
-              <use xlink:href="#wave"></use>
-            </svg>
-          </div>
-  
-          <div class="card__textarea-wrap">
-            <label>
-              <textarea
-                class="card__text"
-                placeholder="Start typing your text here..."
-                name="text"
-              >${description}</textarea>
-            </label>
-          </div>
-  
-          <div class="card__settings">
-            <div class="card__details">
-              <div class="card__dates">
-                <button class="card__date-deadline-toggle" type="button">date: 
-                  <span class="card__date-status">
-                    ${dueDate ? `yes` : `no`}
-                  </span>
-                </button>
-                  ${dueDate ?
-      `<fieldset class="card__date-deadline">
-        <label class="card__input-deadline-wrap">
-          <input
-            class="card__date"
-            type="text"
-            placeholder=""
-            name="date"
-            value="${day} ${month} ${hour}:${minute} ${dayPeriod}"
-          />
-        </label>
-      </fieldset>` :
-      ``}                
-    
-                  <button class="card__repeat-toggle" type="button">repeat:
-                    <span class="card__repeat-status">
-                      ${getIsRepeat(repeatingDays) ? `no` : `yes`}
-                    </span>
+              <svg class="card__color-bar-wave" width="100%" height="10">
+                <use xlink:href="#wave"></use>
+              </svg>
+            </div>
+            <div class="card__textarea-wrap">
+              <label>
+                <textarea
+                  class="card__text"
+                  placeholder="Start typing your text here..."
+                  name="text"
+                >${description}</textarea>
+              </label>
+            </div>
+            <div class="card__settings">
+              <div class="card__details">
+                <div class="card__dates">
+                  <button class="card__date-deadline-toggle" type="button">
+                    date: <span class="card__date-status">${isDateShowing ? `yes` : `no`}</span>
                   </button>
-  
-                <fieldset class="card__repeat-days">
-                  <div class="card__repeat-days-inner">
-                  ${repeatingDaysRender(repeatingDays)}
-                  </div>
-                </fieldset>
-              </div>
-  
-              <div class="card__hashtag">
-                <div class="card__hashtag-list">
-                ${hashtagRender(tags)}
-                </span>
+                  ${
+    isDateShowing ?
+      `<fieldset class="card__date-deadline">
+                        <label class="card__input-deadline-wrap">
+                          <input
+                            class="card__date"
+                            type="text"
+                            placeholder=""
+                            name="date"
+                            value=" ${time}"
+                          />
+                        </label>
+                      </fieldset>`
+      : ``
+    }
+                  <button class="card__repeat-toggle" type="button">
+                    repeat:<span class="card__repeat-status">${isRepeatingTask ? `yes` : `no`}</span>
+                  </button>
+                  ${
+    isRepeatingTask ?
+      `<fieldset class="card__repeat-days">
+                      <div class="card__repeat-days-inner">
+                        ${repeatingDaysMarkup}
+                      </div>
+                    </fieldset>`
+      : ``
+    }
                 </div>
-  
-                <label>
-                  <input
-                    type="text"
-                    class="card__hashtag-input"
-                    name="hashtag-input"
-                    placeholder="Type new hashtag here"
-                  />
-                </label>
+                <div class="card__hashtag">
+                  <div class="card__hashtag-list">
+                    ${tagsMarkup}
+                  </div>
+                  <label>
+                    <input
+                      type="text"
+                      class="card__hashtag-input"
+                      name="hashtag-input"
+                      placeholder="Type new hashtag here"
+                    />
+                  </label>
+                </div>
+              </div>
+              <div class="card__colors-inner">
+                <h3 class="card__colors-title">Color</h3>
+                <div class="card__colors-wrap">
+                  ${colorsMarkup}
+                </div>
               </div>
             </div>
-  
-            <div class="card__colors-inner">
-              <h3 class="card__colors-title">Color</h3>
-              <div class="card__colors-wrap">
-              ${colorsRender(Colors)}
-              </div>
+            <div class="card__status-btns">
+              <button class="card__save" type="submit" ${isBlockSaveButton ? `disabled` : ``}>save</button>
+              <button class="card__delete" type="button">delete</button>
             </div>
           </div>
-  
-          <div class="card__status-btns">
-            <button class="card__save" type="submit">save</button>
-            <button class="card__delete" type="button">delete</button>
-          </div>
-        </div>
-      </form>
-    </article>`
+        </form>
+      </article>`
   );
 };
 
-export default class TaskEdit extends AbstractComponent {
+export default class TaskEdit extends AbstractSmartComponent {
   constructor(task) {
     super();
+
     this._task = task;
+    this._isDateShowing = !!task.dueDate;
+    this._isRepeatingTask = Object.values(task.repeatingDays).some(Boolean);
+    this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
+    this._flatpickr = null;
+    this._submitHandler = null;
   }
 
   getTemplate() {
-    return createTaskEditTemplate(this._task);
+    return createTaskEditTemplate(this._task, {
+      isDateShowing: this._isDateShowing,
+      isRepeatingTask: this._isRepeatingTask,
+      activeRepeatingDays: this._activeRepeatingDays,
+    });
+  }
+
+  recoveryListeners() {
+    this.setSubmitHandler(this._submitHandler);
+  }
+
+  rerender() {
+    super.rerender();
+  }
+
+  reset() {
+    const task = this._task;
+
+    this._isDateShowing = !!task.dueDate;
+    this._isRepeatingTask = Object.values(task.repeatingDays).some(Boolean);
+    this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
+
+    this.rerender();
   }
 
   setSubmitHandler(handler) {
-    this
-      .getElement()
-      .querySelector(`form`)
+    this.getElement().querySelector(`form`)
       .addEventListener(`submit`, handler);
+
+    this._submitHandler = handler;
   }
 }
