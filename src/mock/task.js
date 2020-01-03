@@ -1,34 +1,41 @@
-import {Colors} from "../const";
+import {COLORS} from '../const.js';
 
-const descriptionItems = [
+const DescriptionItems = [
   `Изучить теорию`,
   `Сделать домашку`,
   `Пройти интенсив на соточку`,
   `Заработать миллион`,
   `Raid World of Warcraft`,
   `Курсы английского`,
-  `Деловая втреча`
+  `Деловая втреча`,
 ];
 
-const defaultRepeatingDays = {
-  mo: false,
-  tu: false,
-  we: false,
-  th: false,
-  fr: false,
-  sa: false,
-  su: false
+const DefaultRepeatingDays = {
+  'mo': false,
+  'tu': false,
+  'we': false,
+  'th': false,
+  'fr': false,
+  'sa': false,
+  'su': false,
 };
 
-const tags = [`homework`, `theory`, `practice`, `intensive`, `keks`];
-
-const getRandomIntegerNumber = (min, max) => {
-  return min + Math.floor(max * Math.random());
-};
+const Tags = [
+  `homework`,
+  `theory`,
+  `practice`,
+  `intensive`,
+  `keks`
+];
 
 const getRandomArrayItem = (array) => {
   const randomIndex = getRandomIntegerNumber(0, array.length);
+
   return array[randomIndex];
+};
+
+const getRandomIntegerNumber = (min, max) => {
+  return min + Math.floor((max - min) * Math.random());
 };
 
 const getRandomDate = () => {
@@ -37,32 +44,40 @@ const getRandomDate = () => {
   const diffValue = sign * getRandomIntegerNumber(0, 7);
 
   targetDate.setDate(targetDate.getDate() + diffValue);
+
   return targetDate;
 };
 
-const generateRepeatingDays = () =>
-  Object.keys(defaultRepeatingDays).reduce((result, key) => {
-    result[key] = Math.random() > 0.5;
-    return result;
-  }, {});
+const generateRepeatingDays = () => {
+  return Object.assign({}, DefaultRepeatingDays, {
+    'mo': Math.random() > 0.5,
+  });
+};
 
-const generateTags = (tagsSet) =>
-  tagsSet.filter(() => Math.random() > 0.5).slice(0, 3);
+const generateTags = (tags) => {
+  return tags
+    .filter(() => Math.random() > 0.5)
+    .slice(0, 3);
+};
 
 const generateTask = () => {
   const dueDate = Math.random() > 0.5 ? null : getRandomDate();
 
   return {
-    description: getRandomArrayItem(descriptionItems),
+    description: getRandomArrayItem(DescriptionItems),
     dueDate,
-    repeatingDays: dueDate ? defaultRepeatingDays : generateRepeatingDays(),
-    tags: new Set(generateTags(tags)),
-    color: getRandomArrayItem(Colors),
+    repeatingDays: dueDate ? DefaultRepeatingDays : generateRepeatingDays(),
+    tags: new Set(generateTags(Tags)),
+    color: getRandomArrayItem(COLORS),
     isFavorite: Math.random() > 0.5,
-    isArchive: Math.random() > 0.5
+    isArchive: Math.random() > 0.5,
   };
 };
 
-const generateTasks = (count) => new Array(count).fill(``).map(generateTask);
+const generateTasks = (count) => {
+  return new Array(count)
+    .fill(``)
+    .map(generateTask);
+};
 
 export {generateTask, generateTasks};

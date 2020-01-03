@@ -1,99 +1,111 @@
-import {formatDate} from "../utils/common";
-import AbstractComponent from "./abstract-component";
+import AbstractComponent from './abstract-component.js';
+import {formatTime} from '../utils/common';
 
-
-const hashtagRender = (tags) => {
-  const spanElements = [];
-  tags.forEach((item) => {
-    spanElements.push(
+const createHashtagsMarkup = (hashtags) => {
+  return hashtags
+    .map((hashtag) => {
+      return (
         `<span class="card__hashtag-inner">
-        <span class="card__hashtag-name">
-          ${item}
-        </span>
-      </span>`);
-  });
-  return spanElements.join(`\n`);
+            <span class="card__hashtag-name">
+              #${hashtag}
+            </span>
+          </span>`
+      );
+    })
+    .join(`\n`);
+};
+
+const createButtonMarkup = (name, isActive) => {
+  return (
+    `<button
+      type="button"
+      class="card__btn card__btn--${name} ${isActive ? `` : `card__btn--disabled`}"
+    >
+      ${name}
+    </button>`
+  );
 };
 
 const createTaskTemplate = (task) => {
-  const {description, dueDate, tags, color, isFavorite, isArchive} = task;
+  const {description, tags, dueDate, color, repeatingDays} = task;
 
-  const formatDueDate = formatDate(dueDate);
-  const {day, dayPeriod, hour, minute, month} = formatDueDate;
+  const isExpired = dueDate instanceof Date && dueDate < Date.now();
+  const isDateShowing = !!dueDate;
+
+  // const date = isDateShowing ? formatDate(dueDate) : ``;
+  const time = isDateShowing ? formatTime(dueDate) : ``;
+
+  const hashtags = createHashtagsMarkup(Array.from(tags));
+  const editButton = createButtonMarkup(`edit`, true);
+  const archiveButton = createButtonMarkup(`archive`, task.isArchive);
+  const favoritesButton = createButtonMarkup(`favorites`, task.isFavorite);
+
+  const repeatClass = Object.values(repeatingDays).some(Boolean) ? `card--repeat` : ``;
+  const deadlineClass = isExpired ? `card--deadline` : ``;
 
   return (
-    `<article class="card card--${color}">
+    `<article class="card card--${color} ${repeatClass} ${deadlineClass}">
       <div class="card__form">
         <div class="card__inner">
           <div class="card__control">
-            <button type="button" class="card__btn card__btn--edit">
-              edit
-            </button>
-            ${isArchive ? `<button type="button" class="card__btn card__btn--archive">
-            archive
-          </button>` : ``}
-          
-          ${isFavorite ? `<button
-          type="button"
-          class="card__btn card__btn--favorites card__btn--disabled"
-        >
-          favorites
-        </button>` : ``}
-          
-        </div>
-
-        <div class="card__color-bar">
-          <svg class="card__color-bar-wave" width="100%" height="10">
-            <use xlink:href="#wave"></use>
-          </svg>
-        </div>
-
-        <div class="card__textarea-wrap">
-          <p class="card__text">${description}</p>
-        </div>
-
-        <div class="card__settings">
-          <div class="card__details">
-          ${dueDate ? `<div class="card__dates">
-          <div class="card__date-deadline">
-            <p class="card__input-deadline-wrap 
-            ${dueDate < new Date() ? `card--deadline` : ``}">
-              <span class="card__date">
-                ${day} ${month}
-              </span>
-              <span class="card__time">
-                ${hour}:${minute} ${dayPeriod}
-              </span>
-            </p>
+            ${editButton}
+            ${archiveButton}
+            ${favoritesButton}
           </div>
-        </div>` : ``}
-            <div class="card__hashtag">
-              <div class="card__hashtag-list">
-              ${hashtagRender(tags)}
+          <div class="card__color-bar">
+            <svg class="card__color-bar-wave" width="100%" height="10">
+              <use xlink:href="#wave"></use>
+            </svg>
+          </div>
+          <div class="card__textarea-wrap">
+            <p class="card__text">${description}</p>
+          </div>
+          <div class="card__settings">
+            <div class="card__details">
+              <div class="card__dates">
+                <div class="card__date-deadline">
+                  <p class="card__input-deadline-wrap">
+                    <span class="card__date"></span>
+                    <span class="card__time">${time}</span>
+                  </p>
+                </div>
+              </div>
+              <div class="card__hashtag">
+                <div class="card__hashtag-list">
+                  ${hashtags}
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </article>`
+    </article>`
   );
 };
 
 export default class Task extends AbstractComponent {
   constructor(task) {
     super();
-    this._task = task;
-  }
 
-  setClickHandler(handler) {
-    this
-      .getElement()
-      .querySelector(`.card__btn--edit`)
-      .addEventListener(`click`, handler);
+    this._task = task;
   }
 
   getTemplate() {
     return createTaskTemplate(this._task);
+  }
+
+  setEditButtonClickHandler(handler) {
+    this.getElement().querySelector(`.card__btn--edit`)
+      .addEventListener(`click`, handler);
+  }
+
+  setFavoritesButtonClickHandler(handler) {
+    this.getElement().querySelector(`.card__btn--favorites`)
+      .addEventListener(`click`, handler);
+  }
+
+  setArchiveButtonClickHandler(handler) {
+    this.getElement().querySelector(`.card__btn--archive`)
+      .addEventListener(`click`, handler);
   }
 }

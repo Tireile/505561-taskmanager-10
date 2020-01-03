@@ -1,14 +1,12 @@
-export const formatDate = (date) => {
-  const formatDueDate = Object.fromEntries(
-      new Intl.DateTimeFormat(`en-US`, {
-        hourCycle: `h12`,
-        day: `2-digit`,
-        month: `long`,
-        hour: `numeric`,
-        minute: `numeric`
-      })
-      .formatToParts(date)
-      .map((el) => [el.type, el.value])
-  );
-  return formatDueDate;
+const castTimeFormat = (value) => {
+  return value < 10 ? `0${value}` : String(value);
+};
+
+export const formatTime = (date) => {
+  const hours = castTimeFormat(date.getHours() % 12);
+  const minutes = castTimeFormat(date.getMinutes());
+
+  const interval = date.getHours() > 11 ? `pm` : `am`;
+
+  return `${hours}:${minutes} ${interval}`;
 };
