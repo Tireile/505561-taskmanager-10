@@ -1,5 +1,5 @@
-const path = require(`path`);
 const MomentLocalesPlugin = require(`moment-locales-webpack-plugin`);
+const path = require(`path`);
 
 module.exports = {
   mode: `development`, // Режим сборки
@@ -28,8 +28,8 @@ module.exports = {
     rules: [
       {
         test: /\.css$/i,
-        use: [`style-loader, css-loader`],
-      }
-    ]
-  }
+        use: ['style-loader', 'css-loader'],
+      },
+    ],
+  },
 };

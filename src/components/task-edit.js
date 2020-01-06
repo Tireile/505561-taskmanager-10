@@ -1,6 +1,7 @@
+import flatpickr from 'flatpickr';
 import AbstractSmartComponent from './abstract-smart-component.js';
 import {COLORS, DAYS} from '../const.js';
-import {formatTime} from '../utils/common.js';
+import {formatTime, formatDate} from '../utils/common.js';
 
 const isRepeating = (repeatingDays) => {
   return Object.values(repeatingDays).some(Boolean);
@@ -83,7 +84,7 @@ const createTaskEditTemplate = (task, options = {}) => {
   const isBlockSaveButton = (isDateShowing && isRepeatingTask) ||
     (isRepeatingTask && !isRepeating(activeRepeatingDays));
 
-  // const date = (isDateShowing && dueDate) ? formatDate(dueDate) : ``;
+  const date = (isDateShowing && dueDate) ? formatDate(dueDate) : ``;
   const time = (isDateShowing && dueDate) ? formatTime(dueDate) : ``;
 
   const repeatClass = isRepeatingTask ? `card--repeat` : ``;
@@ -117,33 +118,27 @@ const createTaskEditTemplate = (task, options = {}) => {
                   <button class="card__date-deadline-toggle" type="button">
                     date: <span class="card__date-status">${isDateShowing ? `yes` : `no`}</span>
                   </button>
-                  ${
-    isDateShowing ?
-      `<fieldset class="card__date-deadline">
+                  ${isDateShowing ? `
+                      <fieldset class="card__date-deadline">
                         <label class="card__input-deadline-wrap">
                           <input
                             class="card__date"
                             type="text"
                             placeholder=""
                             name="date"
-                            value=" ${time}"
+                            value="${date} ${time}"
                           />
                         </label>
-                      </fieldset>`
-      : ``
-    }
+                      </fieldset>` : ``}
                   <button class="card__repeat-toggle" type="button">
                     repeat:<span class="card__repeat-status">${isRepeatingTask ? `yes` : `no`}</span>
                   </button>
-                  ${
-    isRepeatingTask ?
-      `<fieldset class="card__repeat-days">
+                  ${isRepeatingTask ? `
+                    <fieldset class="card__repeat-days">
                       <div class="card__repeat-days-inner">
                         ${repeatingDaysMarkup}
                       </div>
-                    </fieldset>`
-      : ``
-    }
+                    </fieldset>` : ``}
                 </div>
                 <div class="card__hashtag">
                   <div class="card__hashtag-list">
@@ -185,7 +180,9 @@ export default class TaskEdit extends AbstractSmartComponent {
     this._isRepeatingTask = Object.values(task.repeatingDays).some(Boolean);
     this._activeRepeatingDays = Object.assign({}, task.repeatingDays);
     this._flatpickr = null;
-    this._submitHandler = null;
+
+    this._applyFlatpickr();
+    this._subscribeOnEvents();
   }
 
   getTemplate() {
@@ -197,11 +194,13 @@ export default class TaskEdit extends AbstractSmartComponent {
   }
 
   recoveryListeners() {
-    this.setSubmitHandler(this._submitHandler);
+    this._subscribeOnEvents();
   }
 
   rerender() {
     super.rerender();
+
+    this._applyFlatpickr();
   }
 
   reset() {
@@ -217,7 +216,48 @@ export default class TaskEdit extends AbstractSmartComponent {
   setSubmitHandler(handler) {
     this.getElement().querySelector(`form`)
       .addEventListener(`submit`, handler);
+  }
 
-    this._submitHandler = handler;
+  _applyFlatpickr() {
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+
+    if (this._isDateShowing) {
+      const dateElement = this.getElement().querySelector(`.card__date`);
+      this._flatpickr = flatpickr(dateElement, {
+        altInput: true,
+        allowInput: true,
+        defaultDate: this._task.dueDate,
+      });
+    }
+  }
+
+  _subscribeOnEvents() {
+    const element = this.getElement();
+
+    element.querySelector(`.card__date-deadline-toggle`)
+      .addEventListener(`click`, () => {
+        this._isDateShowing = !this._isDateShowing;
+
+        this.rerender();
+      });
+
+    element.querySelector(`.card__repeat-toggle`)
+      .addEventListener(`click`, () => {
+        this._isRepeatingTask = !this._isRepeatingTask;
+
+        this.rerender();
+      });
+
+    const repeatDays = element.querySelector(`.card__repeat-days`);
+    if (repeatDays) {
+      repeatDays.addEventListener(`change`, (evt) => {
+        this._activeRepeatingDays[evt.target.value] = evt.target.checked;
+
+        this.rerender();
+      });
+    }
   }
 }
